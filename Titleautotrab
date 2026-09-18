@@ -1,0 +1,127 @@
+-- LocalScript: เติ้ลอีกละ (Rainbow & Custom Equipper - Trab)
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+if LocalPlayer.PlayerGui:FindFirstChild("TitleEekLaeGUI") then
+    LocalPlayer.PlayerGui.TitleEekLaeGUI:Destroy()
+end
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "TitleEekLaeGUI"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+
+-- กรอบหลัก
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 160, 0, 70)
+MainFrame.Position = UDim2.new(0.5, -80, 0.4, -35)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Parent = ScreenGui
+
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 8)
+UICorner.Parent = MainFrame
+
+-- หัวข้อ "เติ้ลอีกละ"
+local TitleLabel = Instance.new("TextLabel")
+TitleLabel.Name = "TitleLabel"
+TitleLabel.Size = UDim2.new(0.7, 0, 0, 25)
+TitleLabel.Position = UDim2.new(0.05, 0, 0, 3)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Text = "เติ้ลอีกละ"
+TitleLabel.TextSize = 13
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+TitleLabel.Parent = MainFrame
+
+-- เอฟเฟกต์สีรุ้งวิ่งวน
+task.spawn(function()
+    while ScreenGui.Parent do
+        local hue = (tick() % 4) / 4
+        TitleLabel.TextColor3 = Color3.fromHSV(hue, 1, 1)
+        task.wait(0.03)
+    end
+end)
+
+-- ปุ่มล็อคไม่ให้เลื่อน
+local LockButton = Instance.new("TextButton")
+LockButton.Name = "LockButton"
+LockButton.Size = UDim2.new(0, 20, 0, 20)
+LockButton.Position = UDim2.new(0.82, 0, 0, 5)
+LockButton.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+LockButton.Text = "🔓"
+LockButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+LockButton.TextSize = 11
+LockButton.Parent = MainFrame
+
+local LockCorner = Instance.new("UICorner")
+LockCorner.CornerRadius = UDim.new(0, 4)
+LockCorner.Parent = LockButton
+
+local isLocked = false
+LockButton.MouseButton1Click:Connect(function()
+    isLocked = not isLocked
+    MainFrame.Draggable = not isLocked
+    if isLocked then
+        LockButton.Text = "🔒"
+        LockButton.BackgroundColor3 = Color3.fromRGB(231, 76, 60)
+    else
+        LockButton.Text = "🔓"
+        LockButton.BackgroundColor3 = Color3.fromRGB(60, 60, 70)
+    end
+end)
+
+-- ปุ่มกดถือไอเท็ม
+local EquipButton = Instance.new("TextButton")
+EquipButton.Name = "EquipButton"
+EquipButton.Size = UDim2.new(0.9, 0, 0, 30)
+EquipButton.Position = UDim2.new(0.05, 0, 0.48, 0)
+EquipButton.BackgroundColor3 = Color3.fromRGB(50, 150, 250)
+EquipButton.Text = "ถือจิ๋มกระป๋อง"
+EquipButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+EquipButton.TextSize = 11
+EquipButton.Font = Enum.Font.GothamSemibold
+EquipButton.Parent = MainFrame
+
+local ButtonCorner = Instance.new("UICorner")
+ButtonCorner.CornerRadius = UDim.new(0, 6)
+ButtonCorner.Parent = EquipButton
+
+-- ฟังก์ชันกดถือไอเท็ม Trab
+EquipButton.MouseButton1Click:Connect(function()
+    local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    local backpack = LocalPlayer:FindFirstChildOfClass("Backpack")
+
+    if not humanoid or not backpack then return end
+
+    local targetTool = nil
+
+    -- ค้นหาไอเท็ม Trab (เช็กคำว่า trab, trap, กับดัก ทั้งตัวพิมพ์เล็กและใหญ่)
+    for _, item in ipairs(backpack:GetChildren()) do
+        if item:IsA("Tool") then
+            local name = item.Name:lower()
+            if string.find(name, "trab") or string.find(name, "trap") or string.find(name, "กับดัก") then
+                targetTool = item
+                break
+            end
+        end
+    end
+
+    if targetTool then
+        humanoid:EquipTool(targetTool)
+        EquipButton.Text = "ถือสำเร็จ!"
+        EquipButton.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
+    else
+        EquipButton.Text = "ไม่พบไอเท็ม!"
+        EquipButton.BackgroundColor3 = Color3.fromRGB(231, 76, 60)
+    end
+
+    task.wait(1.5)
+    EquipButton.Text = "ถือจิ๋มกระป๋อง"
+    EquipButton.BackgroundColor3 = Color3.fromRGB(50, 150, 250)
+end)
